@@ -1,5 +1,5 @@
 group 'com.almoullim.background_location'
-version '1.0-SNAPSHOT'
+version '1.0.0'
 
 buildscript {
     ext.kotlin_version = '1.7.10'
@@ -25,6 +25,8 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
+    namespace 'com.almoullim.background_location'
+
     compileSdkVersion 34
 
     compileOptions {

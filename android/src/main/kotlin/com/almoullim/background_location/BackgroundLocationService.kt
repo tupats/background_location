@@ -24,7 +24,7 @@ import io.flutter.plugin.common.PluginRegistry
 
 class BackgroundLocationService: MethodChannel.MethodCallHandler, PluginRegistry.RequestPermissionsResultListener {
     companion object {
-        const val METHOD_CHANNEL_NAME = "${BackgroundLocationPlugin.PLUGIN_ID}/methods"
+        const val METHOD_CHANNEL_NAME = "com.almoullim.background_location/methods"
         private const val REQUEST_PERMISSIONS_REQUEST_CODE = 34
 
         private var instance: BackgroundLocationService? = null
@@ -104,6 +104,7 @@ class BackgroundLocationService: MethodChannel.MethodCallHandler, PluginRegistry
     }
 
     private fun startLocationService(distanceFilter: Double?, forceLocationManager : Boolean?): Int{
+        println("BACKGROUNDLOCATION: startLocationService")
         LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver!!,
                 IntentFilter(LocationUpdatesService.ACTION_BROADCAST))
         if (!bound) {
@@ -117,6 +118,7 @@ class BackgroundLocationService: MethodChannel.MethodCallHandler, PluginRegistry
     }
 
     private fun isLocationServiceRunning(): Boolean {
+        println("BACKGROUNDLOCATION: isLocationServiceRunning")
         val manager: ActivityManager = context!!.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
             if (LocationUpdatesService::class.java.getName() == service.service.getClassName()) {
@@ -130,6 +132,7 @@ class BackgroundLocationService: MethodChannel.MethodCallHandler, PluginRegistry
     }
 
     private fun stopLocationService(): Int {
+        println("BACKGROUNDLOCATION:  stopLocationService")
         service?.removeLocationUpdates()
         LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver!!)
 
@@ -142,6 +145,7 @@ class BackgroundLocationService: MethodChannel.MethodCallHandler, PluginRegistry
     }
 
     private fun setAndroidNotification(title: String?, message: String?, icon: String?):Int{
+        println("BACKGROUNDLOCATION: setAndroidNotification")
         if (title != null) LocationUpdatesService.NOTIFICATION_TITLE = title
         if (message != null) LocationUpdatesService.NOTIFICATION_MESSAGE = message
         if (icon != null) LocationUpdatesService.NOTIFICATION_ICON = icon
@@ -163,6 +167,7 @@ class BackgroundLocationService: MethodChannel.MethodCallHandler, PluginRegistry
     }
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: MethodChannel.Result) {
+        println("BACKGROUNDLOCATION: onMethodCall ${call.method}")
         when (call.method) {
             "stop_location_service" -> result.success(stopLocationService())
             "start_location_service" -> result.success(startLocationService(call.argument("distance_filter"), call.argument("force_location_manager")))
@@ -178,6 +183,7 @@ class BackgroundLocationService: MethodChannel.MethodCallHandler, PluginRegistry
      * If permission is denied, it requests the needed permission
      */
     private fun requestLocation() {
+        println("BACKGROUNDLOCATION: requestLocation")
         if (!checkPermissions()) {
             requestPermissions()
         } else {
@@ -198,17 +204,16 @@ class BackgroundLocationService: MethodChannel.MethodCallHandler, PluginRegistry
      * Depending on the current activity, displays a rationale for the request.
      */
     private fun requestPermissions() {
+        println("BACKGROUNDLOCATION: requestPermissions")
         if(activity == null) {
             return
         }
 
         val shouldProvideRationale = ActivityCompat.shouldShowRequestPermissionRationale(activity!!, Manifest.permission.ACCESS_FINE_LOCATION)
         if (shouldProvideRationale) {
-            Log.i(BackgroundLocationPlugin.TAG, "Displaying permission rationale to provide additional context.")
             Toast.makeText(context, R.string.permission_rationale, Toast.LENGTH_LONG).show()
 
         } else {
-            Log.i(BackgroundLocationPlugin.TAG, "Requesting permission")
             ActivityCompat.requestPermissions(activity!!,
                     arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                     REQUEST_PERMISSIONS_REQUEST_CODE)
@@ -238,10 +243,9 @@ class BackgroundLocationService: MethodChannel.MethodCallHandler, PluginRegistry
      * @return true if the result has been handled.
      */
 override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray): Boolean{
-        Log.i(BackgroundLocationPlugin.TAG, "onRequestPermissionResult")
         if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
             when {
-                grantResults!!.isEmpty() -> Log.i(BackgroundLocationPlugin.TAG, "User interaction was cancelled.")
+                grantResults!!.isEmpty() -> println("User interaction was cancelled.")
                 grantResults[0] == PackageManager.PERMISSION_GRANTED -> service?.requestLocationUpdates()
                 else -> Toast.makeText(context, R.string.permission_denied_explanation, Toast.LENGTH_LONG).show()
             }

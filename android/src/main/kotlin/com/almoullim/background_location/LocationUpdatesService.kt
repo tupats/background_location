@@ -136,8 +136,13 @@ class LocationUpdatesService : Service() {
         mServiceHandler = Handler(handlerThread.looper)
 
         mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        println("BACKGROUNDLOCATION: Builds version: ${Build.VERSION.SDK_INT}, ${Build.VERSION_CODES.O}, ${Build.VERSION_CODES.TIRAMISU}")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Application Name"
+            println("BACKGROUNDLOCATION: Creating notification channel")
+            println("BACKGROUNDLOCATION: Notification channel name: Application Name")
+            val name = "Background Location Tracking"
+            println("BACKGROUNDLOCATION: Creating notification channel with name: $name")
+            println("BACKGROUNDLOCATION: Creating notification channel with id: $CHANNEL_ID")
             val mChannel = NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT)
             mChannel.setSound(null, null)
             mNotificationManager!!.createNotificationChannel(mChannel)
@@ -154,6 +159,7 @@ class LocationUpdatesService : Service() {
         val filter = IntentFilter()
         filter.addAction(STOP_SERVICE)
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            println("BACKGROUNDLOCATION: Registering receiver with TIRAMISU")
             registerReceiver(broadcastReceiver, filter, RECEIVER_EXPORTED)
         } else {
             registerReceiver(broadcastReceiver, filter)
